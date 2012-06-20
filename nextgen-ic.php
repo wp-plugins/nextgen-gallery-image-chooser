@@ -1070,7 +1070,7 @@ function nggic_make_html_ngg_album_insert_button(){
 * @return string the appended plugins string
 */
 function nggic_plugin($plugin_array) {
-   $plugin_array['nggic'] = get_bloginfo('wpurl').'/wp-content/plugins/nextgen-ic/editor_plugin.js';
+   $plugin_array['nggic'] = get_bloginfo('wpurl').'/wp-content/plugins/nextgen-gallery-image-chooser/editor_plugin.js';
    return $plugin_array;
 }
 
