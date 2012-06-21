@@ -3,7 +3,7 @@
 Plugin Name: NextGEN Gallery Image Chooser
 Plugin URI: 
 Description: Comfortable image chooser for the NextGEN Gallery. Based on g2image.
-Version: 0.0.2
+Version: 0.1.0
 Author: Ulrich Mertin
 Author URI: http://www.ulrich-mertin.de
 */
@@ -19,7 +19,7 @@ Author URI: http://www.ulrich-mertin.de
 global $wpdb, $ngg, $wp_version;
 
 // ====( Version Info )
-$nggic_version_text = '0.0.2';
+$nggic_version_text = '0.1.0';
 
 // Is this a TinyMCE window?
 if(!isset($_REQUEST['nggic_tinymce']) && !isset($_SESSION['nggic_tinymce'])) {
@@ -215,20 +215,21 @@ function nggic_get_gallery_info($item_id) {
 	if (nggic_starts_with($item_id, 'a')) {
 		$gallery= $nggdb->find_album(substr($item_id, 1));
 		$item_info['title'] = $gallery->name;
+		
+		$item_info['thumbnail_src'] = plugins_url( 'images/ngg_placeholder_album.jpg' , __FILE__ );
 	}
 	else {
 		$gallery= $nggdb->find_gallery($item_id);
 		$item_info['title'] = $gallery->title;
+
+		$thumbnail = $nggdb->find_image($gallery->previewpic);
+		$item_info['thumbnail_src'] = $thumbnail->thumbURL;
 	}
 	$item_info['id'] = $item_id;
 	$item_info['description'] = $gallery->galdesc;
 	$item_info['summary'] = $gallery->galdesc;
 	
-	$thumbnail = $nggdb->find_image($gallery->previewpic);
-	$item_info['thumbnail_src'] = $thumbnail->thumbURL;
 	
-	$thumb_meta = $thumbnail->meta_data['thumbnail'];
-
 	if(empty($item_info['summary']))
 		$item_info['summary'] = $item_info['title'];
 
@@ -948,6 +949,64 @@ function nggic_make_html_img($item_info) {
 }
 
 /**
+ * Creates the HTML for inserting an album or gallery NGG Tag
+ *
+ * @return string $html The HTML for for inserting an album or gallery NGG Tag
+ */
+function nggic_make_html_ngg_album_insert_button(){
+
+	GLOBAL $nggic_options, $nggic_gallery_items;
+	$html = '';
+
+	$album_info = nggic_get_gallery_info($nggic_options['current_gallery']);
+
+	if ($album_info['id'] != -1) {
+		// Create the form
+		$html .= "<div>\n"
+		. "    <fieldset>\n"
+		. '        <legend>' . T_('Insert a NGG tag for the current gallery:') . ' ' . $album_info['title'] . '</legend>' . "\n";
+	
+		if (empty($nggic_gallery_items)) {
+			$html .= '            <label for="ngg_tag_template">' . T_('Template name (Leave blank for the default template)') . '<br /></label>' . "\n"
+			. '            <input type="text" name="ngg_tag_template" size="84" maxlength="150" value="" />' . "\n"
+			. '            <br />' . "\n"
+			. '            <br />' . "\n";
+		}
+
+		// Imagebrowser checkbox
+		$html .= '            <div name="ngg_tag_imagebrowser_checkbox"';
+		if (!nggic_starts_with($album_info['id'], 'a')){
+			$html .= ' class="displayed_textbox"';
+		}
+		else {
+			$html .= 'class="hidden_textbox"';
+		}
+		$html .= '>' . "\n"
+		. '            <input type="checkbox" name="ngg_tag_imagebrowser" />' . "\n"
+		. '            <label for="ngg_tag_imagebrowser">' . T_('Insert gallery as image browser') . '<br /></label>' . "\n"
+		. '            <br />' . "\n"
+		. '            </div>' . "\n";
+
+		// "Insert" button
+		$html .= '            <input type="button"' . "\n"
+		. '            onclick="insertNggTag()"' . "\n"
+		. '            value="' . T_('Insert') . '"' . "\n"
+		. '            />' . "\n";
+	
+		if (!empty($nggic_gallery_items)) {
+			$html .= '            ' . T_('Set the template name in "Insertion Options" below') . ' ' . "\n";
+		}
+		$html .= '            <input type="hidden" name="ngg_id" value="' . $nggic_options['current_gallery'] . '" />' . "\n"
+		. '            <input type="hidden" name="ngg_summary" value="' . $album_info['summary'] . '" />' . "\n"
+		. '            <input type="hidden" name="ngg_thumbnail" value="' . $album_info['thumbnail_src'] . '" />' . "\n"
+		. '    </fieldset>' . "\n"
+		. '</div>' . "\n\n";
+	}
+		
+	return $html;
+}
+
+/**
  * Make the HTML for navigating multiple pages of images
  *
  * @return string $html The HTML for navigating multiple pages of images
@@ -1023,54 +1082,13 @@ function nggic_make_html_select($name,$options,$onchange=null) {
 }
 
 /**
- * Creates the HTML for inserting an album NGG Tag
- *
- * @return string $html The HTML for for inserting an album NGG Tag
- */
-function nggic_make_html_ngg_album_insert_button(){
-
-	GLOBAL $nggic_options, $nggic_gallery_items;
-	$html = '';
-
-	$album_info = nggic_get_gallery_info($nggic_options['current_gallery']);
-
-	// Create the form
-	$html .= "<div>\n"
-	. "    <fieldset>\n"
-	. '        <legend>' . T_('Insert a NGG tag for the current gallery:') . ' ' . $album_info['title'] . '</legend>' . "\n";
-
-	if (empty($nggic_gallery_items)) {
-		$html .= '            <label for="ngg_tag_template">' . T_('Template name (Leave blank for the default template)') . '<br /></label>' . "\n"
-		. '            <input type="text" name="ngg_tag_template" size="84" maxlength="150" value="" />' . "\n"
-		. '            <br />' . "\n"
-		. '            <br />' . "\n";
-	}
-	// "Insert" button
-	$html .= '            <input type="button"' . "\n"
-	. '            onclick="insertNggTag()"' . "\n"
-	. '            value="' . T_('Insert') . '"' . "\n"
-	. '            />' . "\n";
-
-	if (!empty($nggic_gallery_items)) {
-		$html .= '            ' . T_('Set the template name in "Insertion Options" below') . ' ' . "\n";
-	}
-	$html .= '            <input type="hidden" name="ngg_id" value="' . $nggic_options['current_gallery'] . '" />' . "\n"
-	. '            <input type="hidden" name="ngg_summary" value="' . $album_info['summary'] . '" />' . "\n"
-	. '            <input type="hidden" name="ngg_thumbnail" value="' . $album_info['thumbnail_src'] . '" />' . "\n"
-	. '    </fieldset>' . "\n"
-	. '</div>' . "\n\n";
-
-	return $html;
-}
-
-/**
 * Adds nggic to the TinyMCE plugins list
 *
 * @param string $plugins the buttons string from the WP filter
 * @return string the appended plugins string
 */
 function nggic_plugin($plugin_array) {
-   $plugin_array['nggic'] = get_bloginfo('wpurl').'/wp-content/plugins/nextgen-gallery-image-chooser/editor_plugin.js';
+   $plugin_array['nggic'] = plugins_url( 'editor_plugin.js' , __FILE__ );
    return $plugin_array;
 }
 

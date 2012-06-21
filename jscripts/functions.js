@@ -353,8 +353,13 @@ function insertNggTag(){
 		if (obj.ngg_tag_template.value != ''){
 			htmlCode += ' template=&quot;' + obj.ngg_tag_template.value + '&quot;';
 		}
-		htmlCode += '" title="' + obj.ngg_id.value
-		+ '" class="mceItem" id="mce_plugin_nggic_ngg_gallery" />';
+		htmlCode += '" title="' + obj.ngg_id.value;
+		if (obj.ngg_tag_imagebrowser.checked == true) {
+			htmlCode += '" class="mceItem" id="mce_plugin_nggic_ngg_imgbrowser" />';
+		}
+		else {
+			htmlCode += '" class="mceItem" id="mce_plugin_nggic_ngg_gallery" />';
+		}
 	}
 
 	insertHtml(htmlCode,obj);

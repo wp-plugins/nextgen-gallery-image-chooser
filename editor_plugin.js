@@ -128,7 +128,7 @@
 
 				var file_name   = content.substring(startPos + 10,endPos).replace(/"/g, '&quot;');
 
-				var empty_image_path = pluginURL + '/images/ngg_placeholder.jpg';
+				var empty_image_path = pluginURL + '/images/ngg_placeholder_album.jpg';
 
 				// Insert image
 				content = content.substring(0, startPos);
@@ -138,8 +138,6 @@
 
 				content += contentAfter;
 				
-				//alert('insert_to_editor: content='+content);
-
 				startPos++;
 			};
 
@@ -153,7 +151,7 @@
 
 				var file_name   = content.substring(startPos + 14,endPos).replace(/"/g, '&quot;');
 
-				var empty_image_path = pluginURL + '/images/ngg_placeholder.jpg';
+				var empty_image_path = pluginURL + '/images/ngg_placeholder_gallery.jpg';
 
 				// Insert image
 				content = content.substring(0, startPos);
@@ -163,8 +161,27 @@
 
 				content += contentAfter;
 				
-				//alert('insert_to_editor: content='+content);
+				startPos++;
+			};
 
+			// Parse all imagebrowser tags and replace them with images
+			while ((startPos = content.indexOf('[imagebrowser id=', startPos)) != -1) {
+
+				var endPos       = content.indexOf(']', startPos);
+				var contentAfter = content.substring(endPos+1);
+
+				var file_name   = content.substring(startPos + 17,endPos).replace(/"/g, '&quot;');
+
+				var empty_image_path = pluginURL + '/images/ngg_placeholder_gallery.jpg';
+
+				// Insert image
+				content = content.substring(0, startPos);
+
+				content += '<img src="' + empty_image_path + '" ';
+				content += 'alt="'+file_name+'" title="'+file_name+'" class="mceItem" id="mce_plugin_nggic_ngg_imgbrowser" />';
+
+				content += contentAfter;
+				
 				startPos++;
 			};
 
@@ -178,7 +195,7 @@
 
 				var file_name   = content.substring(startPos + 14,endPos).replace(/"/g, '&quot;');
 
-				var empty_image_path = pluginURL + '/images/ngg_placeholder.jpg';
+				var empty_image_path = pluginURL + '/images/ngg_placeholder_image.jpg';
 
 				// Insert image
 				content = content.substring(0, startPos);
@@ -201,7 +218,7 @@
 
 				var file_name   = content.substring(startPos + 10,endPos).replace(/"/g, '&quot;');
 
-				var empty_image_path = pluginURL + '/images/ngg_placeholder.jpg';
+				var empty_image_path = pluginURL + '/images/ngg_placeholder_image.jpg';
 
 				// Insert image
 				content = content.substring(0, startPos);
@@ -218,7 +235,7 @@
 		},
 	
 		_htmltongg : function(content, t) {
-			// Parse all NGG placeholder album tags and replace them with nggallery
+			// Parse all NGG placeholder tags and replace them with NGG tags
 			var startPos = -1;
 
 			while ((startPos = content.indexOf('<img', startPos+1)) != -1) {
@@ -237,17 +254,7 @@
 
 					content = chunkBefore + embedHTML + chunkAfter;
 				}
-			}
-	
-			// Parse all NGG placeholder gallery tags and replace them with nggallery
-			var startPos = -1;
-
-			while ((startPos = content.indexOf('<img', startPos+1)) != -1) {
-
-				var endPos = content.indexOf('/>', startPos);
-				var attribs = t._parseAttributes(content.substring(startPos + 4, endPos));
-
-				if (attribs['id'] == "mce_plugin_nggic_ngg_gallery") {
+				else if (attribs['id'] == "mce_plugin_nggic_ngg_gallery") {
 
 					endPos += 2;
 					var embedHTML = '[nggallery id=' + attribs['alt'].replace(/&quot;/g, '"') + ']';
@@ -258,17 +265,18 @@
 
 					content = chunkBefore + embedHTML + chunkAfter;
 				}
-			}
-	
-			// Parse all NGG placeholder image tags and replace them with singlepic
-			var startPos = -1;
+				else if (attribs['id'] == "mce_plugin_nggic_ngg_imgbrowser") {
 
-			while ((startPos = content.indexOf('<img', startPos+1)) != -1) {
+					endPos += 2;
+					var embedHTML = '[imagebrowser id=' + attribs['alt'].replace(/&quot;/g, '"') + ']';
 
-				var endPos = content.indexOf('/>', startPos);
-				var attribs = t._parseAttributes(content.substring(startPos + 4, endPos));
+					// Insert embed/object chunk
+					chunkBefore = content.substring(0, startPos);
+					chunkAfter  = content.substring(endPos);
 
-				if (attribs['id'] == "mce_plugin_nggic_ngg_image") {
+					content = chunkBefore + embedHTML + chunkAfter;
+				}
+				else if (attribs['id'] == "mce_plugin_nggic_ngg_image") {
 
 					endPos += 2;
 					var embedHTML = '[singlepic id=' + attribs['alt'].replace(/&quot;/g, '"') + ']';
@@ -279,17 +287,7 @@
 
 					content = chunkBefore + embedHTML + chunkAfter;
 				}
-			}
-
-			// Parse all NGG placeholder image tags and replace them with thumb
-			var startPos = -1;
-
-			while ((startPos = content.indexOf('<img', startPos+1)) != -1) {
-
-				var endPos = content.indexOf('/>', startPos);
-				var attribs = t._parseAttributes(content.substring(startPos + 4, endPos));
-
-				if (attribs['id'] == "mce_plugin_nggic_ngg_thumb") {
+				else if (attribs['id'] == "mce_plugin_nggic_ngg_thumb") {
 
 					endPos += 2;
 					var embedHTML = '[thumb id=' + attribs['alt'].replace(/&quot;/g, '"') + ']';
@@ -301,7 +299,7 @@
 					content = chunkBefore + embedHTML + chunkAfter;
 				}
 			}
-
+	
 			return content;
 		},
 

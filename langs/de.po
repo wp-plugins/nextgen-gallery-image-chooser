@@ -168,3 +168,6 @@ msgstr "NGG Tag für die ausgewählte Galerie einfügen:"
 
 msgid "Set the template name in \"Insertion Options\" below"
 msgstr "Template-Namen in den \"Einfügeoptionen\" setzen"
+
+msgid "Insert gallery as image browser"
+msgstr "Als Image Browser einfügen"
