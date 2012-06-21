@@ -2,7 +2,7 @@
 /*
    Copyright (c) 2005 Steven Armstrong <sa at c-area dot ch>
     Modified for NextGEN Gallery Image Chooser by Ulrich Mertin
-    Version 0.0.2
+    Version 0.1.0
 
    Drop in replacement for native gettext.
 

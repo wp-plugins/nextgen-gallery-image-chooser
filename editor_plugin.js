@@ -1,6 +1,6 @@
 /*
     NextGEN Gallery Image Chooser
-    Version 0.0.2
+    Version 0.1.0
 
     Author: Ulrich Mertin
     
@@ -111,7 +111,7 @@
 				author    : 'Ulrich Mertin',
 				authorurl : 'http://www.ulrich-mertin.de',
 				infourl   : 'http://www.ulrich-mertin.de/',
-				version   : "0.0.2"
+				version   : "0.1.0"
 			};
 		},
 		
