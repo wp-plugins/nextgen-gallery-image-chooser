@@ -20,7 +20,7 @@ But as I think that the plugin already is helpful as it is, I'm offering it to y
                
 == Installation ==
 
-1. Upload the `nextgen-ic` directory to the `/wp-content/plugins/` directory
+1. Upload the `nextgen-gallery-image-chooser` directory to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
 1. In the visual editor, you will find a new NGG button which allows adding albums, galleries and images to the post
 
