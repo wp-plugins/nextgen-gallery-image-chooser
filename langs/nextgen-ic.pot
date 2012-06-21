@@ -166,3 +166,6 @@ msgstr ""
 
 msgid "Set the template name in \"Insertion Options\" below"
 msgstr ""
+
+msgid "Insert gallery as image browser"
+msgstr ""
