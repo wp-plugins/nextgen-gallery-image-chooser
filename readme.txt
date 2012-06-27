@@ -3,7 +3,7 @@ Contributors: umertin
 Tags: nextgen, gallery, image chooser
 Requires at least: 3.3.1
 Tested up to: 3.4
-Stable tag: 0.1.0
+Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,7 +21,7 @@ This image chooser allows to browse through hierarchical albums and galleries, i
 
 At present, the NGG tags [album], [nggallery], [thumb], [singlepic], and [imagebrowser], plus some html links are supported.
 
-As there is no elegant way to set the default values, yet, you would have to edit the init.php file, which is quite straightforward.
+Default settings can be altered on the settings page.
 
 At this time, the image chooser is available in English (default) and German. Other translations are welcome and will be included in the next release.
 
