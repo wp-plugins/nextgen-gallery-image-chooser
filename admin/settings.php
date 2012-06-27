@@ -9,7 +9,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('You 
 	$nggic_options = get_option('nggic_options');
 
 	if (!isset($nggic_options['sortby'])) {
-		die('Plugin was not activated - no options found!');
+		include_once (dirname (__FILE__). '/../init.php');
 	}
 
 	// same as $_SERVER['REQUEST_URI'], but should work under IIS 6.0

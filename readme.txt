@@ -21,7 +21,7 @@ This image chooser allows to browse through hierarchical albums and galleries, i
 
 At present, the NGG tags [album], [nggallery], [thumb], [singlepic], and [imagebrowser], plus some html links are supported.
 
-As there is no elegant way to set the default values, yet, you would have to edit the init.php file, which is quite straightforward.
+Default settings can be altered on the settings page.
 
 At this time, the image chooser is available in English (default) and German. Other translations are welcome and will be included in the next release.
 
