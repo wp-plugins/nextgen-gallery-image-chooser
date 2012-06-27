@@ -3,7 +3,7 @@
 Plugin Name: NextGEN Gallery Image Chooser
 Plugin URI: 
 Description: Comfortable image chooser for the NextGEN Gallery. Based on g2image.
-Version: 0.1.0
+Version: 1.0.0
 Author: Ulrich Mertin
 Author URI: http://www.ulrich-mertin.de
 */
@@ -19,28 +19,44 @@ Author URI: http://www.ulrich-mertin.de
 global $wpdb, $ngg, $wp_version;
 
 // ====( Version Info )
-$nggic_version_text = '0.1.0';
+$nggic_version_text = '1.0.0';
+
 
 // Is this a TinyMCE window?
 if(!isset($_REQUEST['nggic_tinymce']) && !isset($_SESSION['nggic_tinymce'])) {
-  //Activate & Deactivate Plugin Functions
-  register_activation_hook( __FILE__, 'nggic_pluginactivate' );
-  // NextGEN Gallery Image Filters - Visual Editor
-  add_action('init', 'nggic_addbuttons');
-  return;
+	//Activate & Deactivate Plugin Functions
+	register_activation_hook( __FILE__, 'nggic_pluginactivate' );
+	register_deactivation_hook( __FILE__, 'nggic_plugindeactivate' );
+	// Image Chooser Buttons - Visual Editor
+	add_action('init', 'nggic_init');
+	add_action('init', 'nggic_addbuttons');
+	
+	// Create admin menu
+	if ( is_admin() ) {
+		require_once (dirname (__FILE__) . '/admin/admin.php');
+		$nggicAdminPanel = new nggicAdminPanel();
+	}	
+	
+	return;
 }
 
 // ====( Initialization Code )
 require_once('../../../wp-load.php');
 session_start();
 
-require_once('init.php');
-nggic_setup_gettext();
+// get the options
+$nggic_options = get_option('nggic_options');
+
+if (!isset($nggic_options['sortby'])) {
+	die('Plugin was not activated - no options found!');
+}
+
+nggic_init();
 
 // ====( NextGEN Gallery validation )
 
 if (!function_exists('nggShowGallery')) {
-  die(T_('Required NextGEN Gallery was not found!'));
+  die(__('Required NextGEN Gallery was not found!', 'nggic'));
 }
 
 nggic_get_request_and_session_options();
@@ -98,15 +114,15 @@ $_SESSION['nggic_last_album_visited'] = $nggic_options['current_gallery'];
 * @return null
 */
 function nggic_addbuttons() {
-   // Don't bother doing this stuff if the current user lacks permissions
-   if ( ! current_user_can('edit_posts') && ! current_user_can('edit_pages') )
-     return;
- 
-   // Add only in Rich Editor mode
-   if ( get_user_option('rich_editing') == 'true') {
-     add_filter("mce_external_plugins", "nggic_plugin");
-     add_filter('mce_buttons', 'nggic_wp_extended_editor_mce_buttons');
-   }
+	// Don't bother doing this stuff if the current user lacks permissions
+	if ( ! current_user_can('edit_posts') && ! current_user_can('edit_pages') )
+		return;
+	
+	// Add only in Rich Editor mode
+	if ( get_user_option('rich_editing') == 'true') {
+		add_filter("mce_external_plugins", "nggic_plugin");
+		add_filter('mce_buttons', 'nggic_wp_extended_editor_mce_buttons');
+	}
 }
 
 /**
@@ -337,20 +353,20 @@ function nggic_get_imginsert_selectoptions(){
 	$imginsert_selectoptions = array();
 
 	// These are the universal image insertion options
-	$message['thumbnail_image'] = T_('Thumbnail with link to image');
-	$message['thumbnail_custom_url'] = T_('Thumbnail with link to custom URL (from text box below)');
-	$message['thumbnail_only'] = T_('Thumbnail only - no link');
-	$message['fullsize_only'] = T_('Fullsized image only - no link');
-	$message['link_image'] = T_('Text link to image');
+	$message['thumbnail_image'] = __('Thumbnail with link to image', 'nggic');
+	$message['thumbnail_custom_url'] = __('Thumbnail with link to custom URL (from text box below)', 'nggic');
+	$message['thumbnail_only'] = __('Thumbnail only - no link', 'nggic');
+	$message['fullsize_only'] = __('Fullsized image only - no link', 'nggic');
+	$message['link_image'] = __('Text link to image', 'nggic');
 
 	foreach($message as $key => $text) {
-		$message[$key] = $text . ' (' . T_('HTML') . ')';
+		$message[$key] = $text . ' (' . __('HTML', 'nggic') . ')';
 	}
 
 	// These are CMS-specific image insertion options
-	$message['ngg_singlepic'] = T_('NGG tag of image');
-	$message['ngg_thumb'] = T_('NGG tag of thumbnail');
-	$message['ngg_thumb_multi'] = T_('NGG tag of multiple thumbnails');
+	$message['ngg_singlepic'] = __('NGG tag of image', 'nggic');
+	$message['ngg_thumb'] = __('NGG tag of thumbnail', 'nggic');
+	$message['ngg_thumb_multi'] = __('NGG tag of multiple thumbnails', 'nggic');
 
 	// Make the universal message array
 	$imginsert_selectoptions = array(
@@ -386,7 +402,6 @@ function nggic_get_request_and_session_options(){
 
 	global $nggic_options;
 
-  //TODO: Get true root album id
   $nggic_options['root_album'] = -1;
   
 	nggic_magic_quotes_remove($_REQUEST);
@@ -459,6 +474,17 @@ function nggic_get_request_and_session_options(){
 }
 
 /**
+* Initializes NextGEN Gallery Image Chooser 
+*
+* @param null
+* @return null
+*/
+function nggic_init() {
+	// load translation
+	load_plugin_textdomain( 'nggic', false, dirname( plugin_basename( __FILE__ ) )  . '/langs/' ); 
+}
+
+/**
  * Remove "Magic Quotes"
  *
  * @param array &$array POST or GET with magic quotes
@@ -483,9 +509,9 @@ function nggic_make_html_about($version){
 	global $nggic_options, $nggic_album_info;
 
 	$html = '<div class="about_button">' . "\n"
-	. '    <input type="button" onclick="alert(\'' . T_('NextGEN Gallery Image Chooser') . '\n' . T_('Version') . ' ' . $version
+	. '    <input type="button" onclick="alert(\'' . __('NextGEN Gallery Image Chooser', 'nggic') . '\n' . __('Version', 'nggic') . ' ' . $version
 	. '\')" '
-	. 'value="' . T_('About NextGEN Gallery Image Chooser') . '"/>' . "\n"
+	. 'value="' . __('About NextGEN Gallery Image Chooser', 'nggic') . '"/>' . "\n"
 	. '    <input type="hidden" name="current_gallery" value="' . $nggic_options['current_gallery'] . '">' . "\n"
 	. '    <input type="hidden" name="album_name" value="' . $nggic_album_info['title'] . '" />' . "\n"
 	. '    <input type="hidden" name="album_url" value="' . $nggic_album_info['url'] . '" />' . "\n"
@@ -507,13 +533,13 @@ function nggic_make_html_album_tree($tree){
 	// Album navigation
 
 	$html = '<div class="dtree">' . "\n"
-	. '    <p><a href="javascript: d.openAll();">' . T_('Expand all') . '</a> | <a href="javascript: d.closeAll();">' . T_('Collapse all') . '</a></p>' . "\n"
+	. '    <p><a href="javascript: d.openAll();">' . __('Expand all', 'nggic') . '</a> | <a href="javascript: d.closeAll();">' . __('Collapse all', 'nggic') . '</a></p>' . "\n"
 	. '    <script type="text/javascript">' . "\n"
 	. '        <!--' . "\n"
 	. '        d = new dTree("d");' . "\n";
 	$parent = -1;
 	$node = 0;
-	$html .= '        d.add(' . $node . ',' . $parent . ',"' . T_('Gallery') . '");' . "\n";
+	$html .= '        d.add(' . $node . ',' . $parent . ',"' . __('Gallery', 'nggic') . '");' . "\n";
 	$node++;
 	$parent++;
 	
@@ -583,25 +609,9 @@ function nggic_make_html_alignment_select(){
 	GLOBAL $nggic_options;
 
 	// array for output
-	$align_options = array('none' => array('text' => T_('None')),
-		'left' => array('text' => T_('Float Left')),
-		'right' => array('text' => T_('Float Right')));
-
-	if ($nggic_options['custom_class_1'] != 'not_used'){
-		$align_options = array_merge($align_options, array($nggic_options['custom_class_1'] => array('text' => $nggic_options['custom_class_1'])));
-	}
-
-	if ($nggic_options['custom_class_2'] != 'not_used'){
-		$align_options = array_merge($align_options, array($nggic_options['custom_class_2'] => array('text' => $nggic_options['custom_class_2'])));
-	}
-
-	if ($nggic_options['custom_class_3'] != 'not_used'){
-		$align_options = array_merge($align_options, array($nggic_options['custom_class_3'] => array('text' => $nggic_options['custom_class_3'])));
-	}
-
-	if ($nggic_options['custom_class_4'] != 'not_used'){
-		$align_options = array_merge($align_options, array($nggic_options['custom_class_4'] => array('text' => $nggic_options['custom_class_4'])));
-	}
+	$align_options = array('none' => array('text' => __('None', 'nggic')),
+		'left' => array('text' => __('Float Left', 'nggic')),
+		'right' => array('text' => __('Float Right', 'nggic')));
 
 	$align_options[$nggic_options['default_alignment']]['selected'] = TRUE;
 
@@ -620,8 +630,8 @@ function nggic_make_html_controls(){
 
 	// "How to insert:" radio buttons
 	$html = "        <fieldset>\n"
-	. '            <legend>' . T_('Insertion Options') . '</legend>' . "\n"
-	. '            <label for="alignment">' . T_('How to Insert Image') . '</label>' . "\n"
+	. '            <legend>' . __('Insertion Options', 'nggic') . '</legend>' . "\n"
+	. '            <label for="alignment">' . __('How to Insert Image', 'nggic') . '</label>' . "\n"
 	. nggic_make_html_select('imginsert', $nggic_imginsert_options, 'toggleTextboxes();')
 	. '            <br />' . "\n"
 	. '            <br />' . "\n"
@@ -635,7 +645,7 @@ function nggic_make_html_controls(){
 		$html .= 'class="hidden_textbox"';
 	}
 	$html .= '>' . "\n"
-	. '            <label for="custom_url">' . T_('Custom URL') . '<br /></label>' . "\n"
+	. '            <label for="custom_url">' . __('Custom URL', 'nggic') . '<br /></label>' . "\n"
 	. '            <input type="text" name="custom_url" size="84" maxlength="150" value="' . $nggic_options['custom_url'] . '" />' . "\n"
 	. '            <br />' . "\n"
 	. '            <br />' . "\n"
@@ -650,7 +660,7 @@ function nggic_make_html_controls(){
 		$html .= 'class="hidden_textbox"';
 	}
 	$html .= '>' . "\n"
-	. '            <label for="link_text">' . T_('Text for text link') . '<br /></label>' . "\n"
+	. '            <label for="link_text">' . __('Text for text link', 'nggic') . '<br /></label>' . "\n"
 	. '            <input type="text" name="link_text" size="84" maxlength="150" value="" />' . "\n"
 	. '            <br />' . "\n"
 	. '            <br />' . "\n"
@@ -666,9 +676,9 @@ function nggic_make_html_controls(){
 		$html .= 'class="hidden_textbox"';
 	}
 	$html .= '>' . "\n"
-	. '            <label for="ngg_tag_width">' . T_('Image width x  height (Leave blank for the original size)') . '</label>' . "\n"
-	. '            <input type="text" name="ngg_tag_width" size="10" maxlength="5" value="" />' . " x \n"
-	. '            <input type="text" name="ngg_tag_height" size="10" maxlength="5" value="" />' . "\n"
+	. '            <label for="ngg_tag_width">' . __('Image width x  height (Leave blank for the original size)', 'nggic') . '</label>' . "\n"
+	. '            <input type="text" name="ngg_tag_width" size="10" maxlength="5" value="' . $nggic_options['tag_width'] . '" />' . " x \n"
+	. '            <input type="text" name="ngg_tag_height" size="10" maxlength="5" value="' . $nggic_options['tag_height'] . '" />' . "\n"
 	. '            <br />' . "\n"
 	. '            <br />' . "\n"
 	. '            </div>' . "\n";
@@ -682,11 +692,11 @@ function nggic_make_html_controls(){
 		$html .= 'class="hidden_textbox"';
 	}
 	$html .= '>' . "\n"
-	. '            <label for="ngg_tag_link">' . T_('Link (Leave blank for none)') . '<br /></label>' . "\n"
+	. '            <label for="ngg_tag_link">' . __('Link (Leave blank for none)', 'nggic') . '<br /></label>' . "\n"
 	. '            <input type="text" name="ngg_tag_link" size="84" maxlength="150" value="" />' . "\n"
 	. '            <br />' . "\n"
 	. '            <br />' . "\n"
-	. '            <label for="alignment">' . T_('NGG Float Class') . '</label>' . "\n"
+	. '            <label for="alignment">' . __('NGG Float Class', 'nggic') . '</label>' . "\n"
 	. nggic_make_html_alignment_select()
 	. '            <br />' . "\n"
 	. '            <br />' . "\n"
@@ -695,12 +705,14 @@ function nggic_make_html_controls(){
 	// Mode selection
 	$nggic_mode_options = array(
 		'none' => array(
-			'text'  => T_('Default') ),
+			'text'  => __('Default', 'nggic') ),
 		'web20' => array(
 			'text'  => 'Web 2.0' ),
 		'watermark' => array(
-			'text'  => T_('Watermark') ),
+			'text'  => __('Watermark', 'nggic') ),
 	);
+	$nggic_mode_options[$nggic_options['default_mode']]['selected'] = TRUE;
+
 	$html .= '            <div name="ngg_tag_mode_select"';
 	if ($nggic_options['default_action'] == 'ngg_singlepic'){
 		$html .= ' class="displayed_textbox"';
@@ -709,7 +721,7 @@ function nggic_make_html_controls(){
 		$html .= 'class="hidden_textbox"';
 	}
 	$html .= '>' . "\n"
-	. '            <label for="alignment">' . T_('Mode') . '</label>' . "\n"
+	. '            <label for="alignment">' . __('Mode', 'nggic') . '</label>' . "\n"
 	. nggic_make_html_select('ngg_tag_mode_select', $nggic_mode_options)
 	. '            <br />' . "\n"
 	. '            <br />' . "\n"
@@ -728,7 +740,7 @@ function nggic_make_html_controls(){
 		$html .= 'class="hidden_textbox"';
 	}
 	$html .= '>' . "\n"
-	. '            <label for="ngg_tag_template">' . T_('Template name (Leave blank for the default template)') . '<br /></label>' . "\n"
+	. '            <label for="ngg_tag_template">' . __('Template name (Leave blank for the default template)', 'nggic') . '<br /></label>' . "\n"
 	. '            <input type="text" name="ngg_tag_template" size="84" maxlength="150" value="" />' . "\n"
 	. '            <br />' . "\n"
 	. '            <br />' . "\n"
@@ -738,13 +750,13 @@ function nggic_make_html_controls(){
 
 	// "Insert" button
 	$html .=  "        <fieldset>\n"
-	. '            <legend>' . T_('Press button to insert checked image(s)') . '</legend>' . "\n"
+	. '            <legend>' . __('Press button to insert checked image(s)', 'nggic') . '</legend>' . "\n"
 	. "            <input disabled type='button'\n"
 	. "            name='insert_button'\n"
 	. '            onclick="insertItems();"' . "\n"
-	. '            value="' . T_('Insert') . '"' . "\n"
+	. '            value="' . __('Insert', 'nggic') . '"' . "\n"
 	. '            />' . "\n"
-	. '            <a href="javascript: checkAllImages();">' . T_('Check all') . '</a> | <a href="javascript: uncheckAllImages();">' . T_('Uncheck all') . '</a>' . "\n"
+	. '            <a href="javascript: checkAllImages();">' . __('Check all', 'nggic') . '</a> | <a href="javascript: uncheckAllImages();">' . __('Uncheck all', 'nggic') . '</a>' . "\n"
 	. "        </fieldset>\n\n";
 
 	return $html;
@@ -766,20 +778,20 @@ function nggic_make_html_display_options(){
 	}
 
 	// array for output
-	$sortoptions = array('gallery_order' => array('text' => T_('NextGEN Gallery order')),
-		'title_asc' => array('text' => T_('NextGEN Gallery Title (A-z)')),
-		'title_desc' => array('text' => T_('NextGEN Gallery Title (z-A)')),
-		'orig_time_desc' => array('text' => T_('Origination Time (Newest First)')),
-		'orig_time_asc' => array('text' => T_('Origination Time (Oldest First)')));
+	$sortoptions = array('gallery_order' => array('text' => __('NextGEN Gallery order', 'nggic')),
+		'title_asc' => array('text' => __('NextGEN Gallery Title (A-z)', 'nggic')),
+		'title_desc' => array('text' => __('NextGEN Gallery Title (z-A)', 'nggic')),
+		'orig_time_desc' => array('text' => __('Origination Time (Newest First)', 'nggic')),
+		'orig_time_asc' => array('text' => __('Origination Time (Oldest First)', 'nggic')));
 
 	$sortoptions[$nggic_options['sortby']]['selected'] = TRUE;
 
 	$html = "<div>\n"
 	. "    <fieldset>\n"
-	. '        <legend>' . T_('Display Options') . '</legend>' . "\n"
-	. '            ' . T_('Sorted by:') . "\n"
+	. '        <legend>' . __('Display Options', 'nggic') . '</legend>' . "\n"
+	. '            ' . __('Sorted by:', 'nggic') . "\n"
 	. nggic_make_html_select('sortby',$sortoptions,'document.forms[0].submit();')
-	. '            ' . T_('Per Page:') . "\n"
+	. '            ' . __('Per Page:', 'nggic') . "\n"
 	. '            <select name="images_per_page" onchange="document.forms[0].submit();">' . "\n";
 
 	for($i=0;$i<count($images_per_page_options);$i++){
@@ -788,7 +800,7 @@ function nggic_make_html_display_options(){
 			$html .= " selected='selected'";
 		$html .= '>';
 		if ($images_per_page_options[$i] == 9999)
-			$html .= T_('All');
+			$html .= __('All', 'nggic');
 		else
 			$html .= $images_per_page_options[$i];
 		$html .= "</option>\n";
@@ -803,7 +815,7 @@ function nggic_make_html_display_options(){
 	else
 		$html .= "\n";
 	$html .= "            onclick='showThumbnails()'"
-	.  '>' . T_('Thumbnails') . '</input>' . "\n";
+	.  '>' . __('Thumbnails', 'nggic') . '</input>' . "\n";
 
 	$html .= '            <input type="radio" name="display" value="filenames"';
 	if ($nggic_options['display_filenames'])
@@ -811,7 +823,7 @@ function nggic_make_html_display_options(){
 	else
 		$html .= "\n";
 	$html .= "            onclick='showFileNames()'"
-	.  '>' . T_('Thumbnails with info') . '</input>' . "\n";
+	.  '>' . __('Thumbnails with info', 'nggic') . '</input>' . "\n";
 
 	$html .= "    </fieldset>\n"
 	. "</div>\n\n";
@@ -826,7 +838,7 @@ function nggic_make_html_display_options(){
  */
 function nggic_make_html_empty_page() {
 
-	$html = '<p><strong>' . T_('There are no photos in this album.<br /><br />Please pick another album from the navigation options above.') . '</strong></p>' . "\n\n";
+	$html = '<p><strong>' . __('There are no photos in this album.<br /><br />Please pick another album from the navigation options above.', 'nggic') . '</strong></p>' . "\n\n";
 
 	return $html;
 }
@@ -839,7 +851,7 @@ function nggic_make_html_header(){
 	global $nggic_options;
 	$html = '<html xmlns="http://www.w3.org/1999/xhtml">' . "\n"
 	. '<head>' . "\n"
-	. '    <title>' . T_('NextGEN Gallery Image Chooser') . '</title>' . "\n"
+	. '    <title>' . __('NextGEN Gallery Image Chooser', 'nggic') . '</title>' . "\n"
 	. '    <link rel="stylesheet" href="css/nggic.css" type="text/css" />' . "\n"
 	. '    <link rel="stylesheet" href="css/dtree.css" type="text/css" />' . "\n"
 	. '    <link rel="stylesheet" href="css/slimbox.css" type="text/css" />' . "\n"
@@ -893,9 +905,9 @@ function nggic_make_html_image_navigation(){
 		else
 			$html .= '    <div class="hidden_title">' . "\n";
 
-		$html .= '        ' . T_('Title:') . ' ' . htmlspecialchars($item_info['title']) . '<br />' . "\n"
-		. '        ' . T_('Summary:') . ' ' . htmlspecialchars($item_info['summary']) . '<br />' . "\n"
-		. '        ' . T_('Description:') . ' ' . htmlspecialchars($item_info['description']) . '<br />' . "\n";
+		$html .= '        ' . __('Title:', 'nggic') . ' ' . htmlspecialchars($item_info['title']) . '<br />' . "\n"
+		. '        ' . __('Summary:', 'nggic') . ' ' . htmlspecialchars($item_info['summary']) . '<br />' . "\n"
+		. '        ' . __('Description:', 'nggic') . ' ' . htmlspecialchars($item_info['description']) . '<br />' . "\n";
 
 		$html .=  "    </div>\n\n";
 
@@ -964,10 +976,10 @@ function nggic_make_html_ngg_album_insert_button(){
 		// Create the form
 		$html .= "<div>\n"
 		. "    <fieldset>\n"
-		. '        <legend>' . T_('Insert a NGG tag for the current gallery:') . ' ' . $album_info['title'] . '</legend>' . "\n";
+		. '        <legend>' . __('Insert a NGG tag for the current gallery:', 'nggic') . ' ' . $album_info['title'] . '</legend>' . "\n";
 	
 		if (empty($nggic_gallery_items)) {
-			$html .= '            <label for="ngg_tag_template">' . T_('Template name (Leave blank for the default template)') . '<br /></label>' . "\n"
+			$html .= '            <label for="ngg_tag_template">' . __('Template name (Leave blank for the default template)', 'nggic') . '<br /></label>' . "\n"
 			. '            <input type="text" name="ngg_tag_template" size="84" maxlength="150" value="" />' . "\n"
 			. '            <br />' . "\n"
 			. '            <br />' . "\n";
@@ -983,18 +995,18 @@ function nggic_make_html_ngg_album_insert_button(){
 		}
 		$html .= '>' . "\n"
 		. '            <input type="checkbox" name="ngg_tag_imagebrowser" />' . "\n"
-		. '            <label for="ngg_tag_imagebrowser">' . T_('Insert gallery as image browser') . '<br /></label>' . "\n"
+		. '            <label for="ngg_tag_imagebrowser">' . __('Insert gallery as image browser', 'nggic') . '<br /></label>' . "\n"
 		. '            <br />' . "\n"
 		. '            </div>' . "\n";
 
 		// "Insert" button
 		$html .= '            <input type="button"' . "\n"
 		. '            onclick="insertNggTag()"' . "\n"
-		. '            value="' . T_('Insert') . '"' . "\n"
+		. '            value="' . __('Insert', 'nggic') . '"' . "\n"
 		. '            />' . "\n";
 	
 		if (!empty($nggic_gallery_items)) {
-			$html .= '            ' . T_('Set the template name in "Insertion Options" below') . ' ' . "\n";
+			$html .= '            ' . __('Set the template name in "Insertion Options" below', 'nggic') . ' ' . "\n";
 		}
 		$html .= '            <input type="hidden" name="ngg_id" value="' . $nggic_options['current_gallery'] . '" />' . "\n"
 		. '            <input type="hidden" name="ngg_summary" value="' . $album_info['summary'] . '" />' . "\n"
@@ -1034,8 +1046,8 @@ function nggic_make_html_page_navigation() {
 	if (count($pagelinks) > 1) {
 		$html = '<div>' . "\n"
 		. '    <fieldset>' . "\n"
-		. '        <legend>' . T_('Page Navigation:') . '</legend>' . "\n"
-		. '        ' . T_('Page:') . ' '. "\n"
+		. '        <legend>' . __('Page Navigation:', 'nggic') . '</legend>' . "\n"
+		. '        ' . __('Page:', 'nggic') . ' '. "\n"
 		. implode("     - \n", $pagelinks) . "\n"
 		. '    </fieldset>' . "\n"
 		. '</div>' . "\n\n";
@@ -1093,21 +1105,35 @@ function nggic_plugin($plugin_array) {
 }
 
 /**
-* Sets up the NextGEN Gallery Image Chooser Plugin defaults, adds any user capabilities.
+* Sets up the NGGIC Plugin defaults
 *
 * @param NULL
 * @return NULL
 */
 function nggic_pluginactivate() {
+	global $nggic_options;
 
-  // ==============================================================
-  // NextGEN Gallery validation
-  // ==============================================================
+	if (!function_exists('nggShowGallery')) {
+		die(__('Required NextGEN Gallery was not found!', 'nggic'));
+	}
   
-  if (!function_exists('nggShowGallery')) {
-    die(T_('Required NextGEN Gallery was not found!'));
-  }
-  
+	// Get NGGIC Option Settings
+	$nggic_options = get_option('nggic_options');
+
+	// Has NGGIC Plugin Not been correctly deactivated as Options should not yet exist.
+	if ($nggic_options['sortby']) {
+		// Add BTEV Event Message
+		if (function_exists('btev_trigger_error')) {
+			btev_trigger_error('NextGEN Gallery Image Chooser PLUGIN WAS NOT DEACTIVATED', E_USER_NOTICE, __FILE__);
+		}
+		nggic_plugindeactivate();
+		$nggic_options = '';
+	}
+
+	include_once (dirname (__FILE__). '/init.php');		// default settings
+
+	update_option('nggic_options', $nggic_options);
+
 	// Add BTEV Event Message
 	if (function_exists('btev_trigger_error')) {
 		btev_trigger_error('NextGEN Gallery Image Chooser PLUGIN ACTIVATED', E_USER_NOTICE, __FILE__);
@@ -1116,30 +1142,21 @@ function nggic_pluginactivate() {
 }
 
 /**
-* Sets up gettext for the selected language.
+* Removes all the NGGIC settings
 *
 * @param NULL
 * @return NULL
 */
-function nggic_setup_gettext() {
-	global $nggic_options;
-
-  // Determine gettext locale
-  if (file_exists('./langs/' . $nggic_options[language] . '.mo')) {
-  	$locale = $nggic_options[language];
-  }
-  else {
-  	$locale = 'en';
-  }
-
-  // gettext setup
-  require_once('gettext.inc');
-  T_setlocale(LC_ALL, $locale);
+function nggic_plugindeactivate() {
   
-  // Set the text domain as 'default'
-  T_bindtextdomain('default', 'langs');
-  T_bind_textdomain_codeset('default', 'UTF-8');
-  T_textdomain('default');
+	// Delete NGGIC Option Settings
+	delete_option('nggic_options');
+
+	// Add BTEV Event Message
+	if (function_exists('btev_trigger_error')) {
+		btev_trigger_error('NextGEN Gallery Image Chooser PLUGIN DEACTIVATED', E_USER_NOTICE, __FILE__);
+	}
+
 }
 
 /**

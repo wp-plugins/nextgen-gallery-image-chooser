@@ -3,7 +3,7 @@ Contributors: umertin
 Tags: nextgen, gallery, image chooser
 Requires at least: 3.3.1
 Tested up to: 3.4
-Stable tag: 0.1.0
+Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -43,6 +43,11 @@ None yet.
 4. Image Chooser page for gallery (with images). Options for the [thumb] tag are displayed.
 
 == Changelog ==
+
+= 1.0.0 =
+* Added settings page
+* Harmonized internationalization (use Wordpress functionality instead of own gettext)
+* Plugin now honors Wordpress language settings
 
 = 0.1.0 =
 * Added [imagebrowser] tag

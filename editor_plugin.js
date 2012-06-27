@@ -1,6 +1,6 @@
 /*
     NextGEN Gallery Image Chooser
-    Version 0.1.0
+    Version 1.0.0
 
     Author: Ulrich Mertin
     
@@ -110,8 +110,8 @@
 				longname  : 'NGG Image plugin',
 				author    : 'Ulrich Mertin',
 				authorurl : 'http://www.ulrich-mertin.de',
-				infourl   : 'http://www.ulrich-mertin.de/',
-				version   : "0.1.0"
+				infourl   : 'http://www.ulrich-mertin.de/nggic/',
+				version   : "1.0.0"
 			};
 		},
 		
