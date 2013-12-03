@@ -3,7 +3,7 @@
 Plugin Name: NextGEN Gallery Image Chooser
 Plugin URI: 
 Description: Comfortable image chooser for the NextGEN Gallery. Based on g2image.
-Version: 1.0.0
+Version: 1.0.1
 Author: Ulrich Mertin
 Author URI: http://www.ulrich-mertin.de
 */
@@ -19,7 +19,7 @@ Author URI: http://www.ulrich-mertin.de
 global $wpdb, $ngg, $wp_version;
 
 // ====( Version Info )
-$nggic_version_text = '1.0.0';
+$nggic_version_text = '1.0.1';
 
 
 // Is this a TinyMCE window?
@@ -571,7 +571,7 @@ function nggic_make_html_album_tree_branches($current_node, $parent, &$node) {
   		$album_title = $current_node->slug;
   	}
 
-		$html = '        d.add(' . $node . ',' . $parent . ',"' . $album_title . '","'
+		$html = '        d.add(' . $node . ',' . $parent . ',"' . htmlspecialchars($album_title) . '","'
 		. '?nggic_tinymce=1&current_gallery=a' . $current_node->id . '");' . "\n";
 		$sub_albums = $current_node->children;
 	        if (is_array($sub_albums)) {
@@ -593,7 +593,7 @@ function nggic_make_html_album_tree_branches($current_node, $parent, &$node) {
   		$album_title = $current_node->slug;
   	}
 
-		$html = '        d.add(' . $node . ',' . $parent . ',"' . $album_title . '","'
+		$html = '        d.add(' . $node . ',' . $parent . ',"' . htmlspecialchars($album_title) . '","'
 		. '?nggic_tinymce=1&current_gallery=' . $current_node->gid . '&sortby=' . $nggic_options['sortby']
 		. '&images_per_page=' . $nggic_options['images_per_page'] . '");' . "\n";
 	}
@@ -642,7 +642,7 @@ function nggic_make_html_controls(){
 		$html .= ' class="displayed_textbox"';
 	}
 	else {
-		$html .= 'class="hidden_textbox"';
+		$html .= ' class="hidden_textbox"';
 	}
 	$html .= '>' . "\n"
 	. '            <label for="custom_url">' . __('Custom URL', 'nggic') . '<br /></label>' . "\n"
@@ -657,7 +657,7 @@ function nggic_make_html_controls(){
 		$html .= ' class="displayed_textbox"';
 	}
 	else {
-		$html .= 'class="hidden_textbox"';
+		$html .= ' class="hidden_textbox"';
 	}
 	$html .= '>' . "\n"
 	. '            <label for="link_text">' . __('Text for text link', 'nggic') . '<br /></label>' . "\n"
@@ -673,7 +673,7 @@ function nggic_make_html_controls(){
 		$html .= ' class="displayed_textbox"';
 	}
 	else {
-		$html .= 'class="hidden_textbox"';
+		$html .= ' class="hidden_textbox"';
 	}
 	$html .= '>' . "\n"
 	. '            <label for="ngg_tag_width">' . __('Image width x  height (Leave blank for the original size)', 'nggic') . '</label>' . "\n"
@@ -689,7 +689,7 @@ function nggic_make_html_controls(){
 		$html .= ' class="displayed_textbox"';
 	}
 	else {
-		$html .= 'class="hidden_textbox"';
+		$html .= ' class="hidden_textbox"';
 	}
 	$html .= '>' . "\n"
 	. '            <label for="ngg_tag_link">' . __('Link (Leave blank for none)', 'nggic') . '<br /></label>' . "\n"
@@ -718,7 +718,7 @@ function nggic_make_html_controls(){
 		$html .= ' class="displayed_textbox"';
 	}
 	else {
-		$html .= 'class="hidden_textbox"';
+		$html .= ' class="hidden_textbox"';
 	}
 	$html .= '>' . "\n"
 	. '            <label for="alignment">' . __('Mode', 'nggic') . '</label>' . "\n"
@@ -737,7 +737,7 @@ function nggic_make_html_controls(){
 		$html .= ' class="displayed_textbox"';
 	}
 	else {
-		$html .= 'class="hidden_textbox"';
+		$html .= ' class="hidden_textbox"';
 	}
 	$html .= '>' . "\n"
 	. '            <label for="ngg_tag_template">' . __('Template name (Leave blank for the default template)', 'nggic') . '<br /></label>' . "\n"
@@ -991,7 +991,7 @@ function nggic_make_html_ngg_album_insert_button(){
 			$html .= ' class="displayed_textbox"';
 		}
 		else {
-			$html .= 'class="hidden_textbox"';
+			$html .= ' class="hidden_textbox"';
 		}
 		$html .= '>' . "\n"
 		. '            <input type="checkbox" name="ngg_tag_imagebrowser" />' . "\n"

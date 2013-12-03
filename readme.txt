@@ -3,7 +3,7 @@ Contributors: umertin
 Tags: nextgen, gallery, image chooser
 Requires at least: 3.3.1
 Tested up to: 3.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -43,6 +43,10 @@ None yet.
 4. Image Chooser page for gallery (with images). Options for the [thumb] tag are displayed.
 
 == Changelog ==
+
+= 1.0.1 =
+* Fixed problems with special chars (especially double quotation marks) in album or gallery titles
+* Fixed minor HTML error (missing blank)
 
 = 1.0.0 =
 * Added settings page
