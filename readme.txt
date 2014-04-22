@@ -2,7 +2,7 @@
 Contributors: umertin
 Tags: nextgen, gallery, image chooser
 Requires at least: 3.3.1
-Tested up to: 3.7.1
+Tested up to: 3.9
 Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
