@@ -1,6 +1,6 @@
 /*
     NextGEN Gallery Image Chooser
-    Version 1.0.0
+    Version 1.1.0
 
     Author: Ulrich Mertin
     

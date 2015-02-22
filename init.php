@@ -1,7 +1,7 @@
 <?php
 /*
     NextGEN Gallery Image Chooser
-    Version 1.0.0
+    Version 1.1.0
 
     Author: Ulrich Mertin
     
@@ -29,6 +29,7 @@ function nggic_setdefaults() {
 	$nggic_options['tag_height'] = '';
 	$nggic_options['images_per_page'] = 15;
 	$nggic_options['default_alignment'] = 'none';
+	$nggic_options['default_mode'] = 'none';
 	$nggic_options['custom_url'] = 'http://';
 	$nggic_options['display_filenames'] = TRUE;
 

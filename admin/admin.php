@@ -1,11 +1,10 @@
 <?php
 /**
- * nggAdminPanel - Admin Section for NextGEN Gallery
+ * nggicAdminPanel - Admin Section for NextGEN Gallery Image Chooser
  * 
- * @package NextGEN Gallery
- * @author Alex Rabe
- * @copyright 2008-2011
- * @since 1.0.0
+ * @package NextGEN Gallery Image Chooser
+ * @author Ulrich Mertin
+ * @license    http://www.gnu.org/licenses/gpl-2.0.html GPL Version 2
  */
 class nggicAdminPanel{
 	

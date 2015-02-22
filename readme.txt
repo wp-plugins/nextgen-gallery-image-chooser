@@ -2,8 +2,8 @@
 Contributors: umertin
 Tags: nextgen, gallery, image chooser
 Requires at least: 3.3.1
-Tested up to: 3.9
-Stable tag: 1.0.1
+Tested up to: 4.1.1
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -44,6 +44,9 @@ None yet.
 
 == Changelog ==
 
+= 1.1.0 =
+* Fixed errors with NextGEN Gallery versions greater than 2.0.66
+ 
 = 1.0.1 =
 * Fixed problems with special chars (especially double quotation marks) in album or gallery titles
 * Fixed minor HTML error (missing blank)
